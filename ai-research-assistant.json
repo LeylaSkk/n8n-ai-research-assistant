@@ -1,0 +1,172 @@
+{
+  "name": "ai-research-assistant",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "AI Research Assistant",
+        "formDescription": "Submit a research topic and get an AI-generated report delivered to your email within minutes!",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "What do you want to research?",
+              "placeholder": "AI agents in business automation",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Your email address",
+              "fieldType": "email",
+              "placeholder": "your@email.com",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [
+        -256,
+        -144
+      ],
+      "id": "c19af1be-5a0b-4b60-9200-33d37b2129ea",
+      "name": "On form submission",
+      "webhookId": "2127ce20-8145-4a43-9501-f8f94c801c2a"
+    },
+    {
+      "parameters": {
+        "url": "https://serpapi.com/search",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "engine",
+              "value": "google"
+            },
+            {
+              "name": "q",
+              "value": "={{ $('On form submission').item.json['What do you want to research?'] }}"
+            },
+            {
+              "name": "api_key",
+              "value": "YOUR_SERPAPI_KEY_HERE"
+            },
+            {
+              "name": "num",
+              "value": "5"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -48,
+        -144
+      ],
+      "id": "16fed005-b4ec-4b45-8719-279be7a6a77c",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_GROQ_API_KEY_HERE"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{\n{\n  \"model\": \"llama-3.1-8b-instant\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are an expert research assistant.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Research Topic: \" + $('On form submission').item.json['What do you want to research?'] + \"\\n\\nSearch Results: \" + JSON.stringify($('HTTP Request').item.json.organic_results) + \"\\n\\nCreate a detailed research report about the topic using the search results provided.\"\n    }\n  ],\n  \"temperature\": 0.3,\n  \"max_tokens\": 2000\n}\n}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        160,
+        -144
+      ],
+      "id": "85393db5-ccb8-4a1a-ae97-230a877384f3",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('On form submission').item.json['Your email address'] }}",
+        "subject": "=AI Research Report: {{ $('On form submission').item.json['What do you want to research?'] }}",
+        "message": "=<h2>AI Research Report</h2>\n<p><strong>Topic:</strong> {{ $('On form submission').item.json['What do you want to research?'] }}</p>\n<p><strong>Generated:</strong> {{ new Date().toLocaleString() }}</p>\n<hr>\n<div style=\"font-family: Arial, sans-serif; line-height: 1.6;\">\n{{ $('HTTP Request1').item.json.choices[0].message.content.replace(/\\*\\*(.*?)\\*\\*/g, '<strong>$1</strong>').replace(/\\n/g, '<br>') }}\n</div>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        368,
+        -144
+      ],
+      "id": "a7fb220b-5948-473a-9f87-507f9e7c1ef0",
+      "name": "Send a message",
+      "webhookId": "99902558-ce47-4f64-acf5-0e6702e2268f",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "0FmXyLmUruCeZW4x",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "9f47f0b1-bec3-4e9a-9fe5-7990b8cf2c9e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1cdbc8c8bf60927d8e7152de2f60301e51fcf4c34ffdacc4d94f8d198ce67039"
+  },
+  "id": "wF7Z6Y5CYOUhPWAs",
+  "tags": []
+}
