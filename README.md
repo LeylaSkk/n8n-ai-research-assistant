@@ -116,6 +116,7 @@ In the Gmail node, customize:
 ```
 Web Form → SerpAPI Search → Groq AI Analysis → Gmail Delivery
 ```
+<img width="1231" height="348" alt="image" src="https://github.com/user-attachments/assets/06a0f56a-4111-44dd-953e-20d518cacee8" />
 
 **Node Details:**
 - **n8n Form**: Collects user input (topic + email)
