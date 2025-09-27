@@ -1,5 +1,3 @@
-# n8n-ai-research-assistant
-Intelligent research assistant built with n8n that automatically generates comprehensive reports on any topic. Uses web search + AI analysis to deliver professional research reports via email. Free tier compatible with SerpAPI and Groq.
 # AI Research Assistant - n8n Workflow
 
 An intelligent, automated research assistant that generates comprehensive, professional research reports on any topic using web search and AI analysis. Built with n8n, this workflow transforms a simple topic submission into a detailed research report delivered directly to your email.
